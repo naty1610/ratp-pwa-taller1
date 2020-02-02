@@ -8,9 +8,15 @@
         spinner: document.querySelector('.loader'),
         cardTemplate: document.querySelector('.cardTemplate'),
         container: document.querySelector('.main'),
-        addDialog: document.querySelector('.dialog-container')
+        addDialog: document.querySelector('.dialog-container'),
+        isFirstResponse: true
     };
 
+    // Configuracion de localforage para el almacenamiento
+    localforage.config({
+        driver: localforage.IndexedDB,
+        name: 'ParisMetro'
+    });
 
     /*****************************************************************************
      *
@@ -40,6 +46,9 @@
         }
         app.getSchedule(key, label);
         app.selectedTimetables.push({key: key, label: label});
+
+        app.saveSelectedTimetables();
+
         app.toggleAddDialog(false);
     });
 
@@ -97,6 +106,7 @@
         }
 
         if (app.isLoading) {
+            window.cardLoadTime = performance.now();
             app.spinner.setAttribute('hidden', true);
             app.container.removeAttribute('hidden');
             app.isLoading = false;
@@ -113,10 +123,35 @@
     app.getSchedule = function (key, label) {
         var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
 
+        if ('caches' in window) {
+            /*
+             * Se toma de la cache los mas recientes datos del metro, mientras se realiza la consulta por los mas actuales.
+             */
+            caches.match(url).then(function(response) {
+                if (response) {
+                    response.json().then(function updateFromCache(json) {
+                        var result = {};
+                        result.schedules= json.result.schedules;
+                        result.key = key;
+                        result.label = label;
+                        result.created = json._metadata.date;
+                        app.updateTimetableCard(result);
+                    });
+                }
+            });
+        }
+        
         var request = new XMLHttpRequest();
         request.onreadystatechange = function () {
             if (request.readyState === XMLHttpRequest.DONE) {
                 if (request.status === 200) {
+
+                    if(app.isFirstResponse){
+                        window.apiResponseTime = performance.now();
+                        app.isFirstResponse = false;
+                    }
+                   
+                    
                     var response = JSON.parse(request.response);
                     var result = {};
                     result.key = key;
@@ -179,9 +214,37 @@
      *   Instead, check out IDB (https://www.npmjs.com/package/idb) or
      *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
      ************************************************************************/
+     // Guardar las timetables seleccionadas
+     app.saveSelectedTimetables = function() {
+        var timetables = JSON.stringify(app.selectedTimetables);
+        localforage.setItem('timetables', timetables).then(function(value){
+            console.log('Se guardaron las Timetables seleccionadas');
+        });
+    };
 
-    app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense');
-    app.selectedTimetables = [
-        {key: initialStationTimetable.key, label: initialStationTimetable.label}
-    ];
+    app.defaultTimetables = function() {
+        app.getSchedule('metros/1/bastille/A', 'Bastille, Direction La Défense');
+        app.selectedTimetables = [
+                {key: initialStationTimetable.key, label: initialStationTimetable.label}
+                ];
+        app.saveSelectedTimetables();
+    };
+
+    localforage.getItem('timetables').then(function(value) {
+
+        app.selectedTimetables = value;
+
+        if (app.selectedTimetables) {
+            app.selectedTimetables = JSON.parse(app.selectedTimetables);
+            app.selectedTimetables.forEach(function(timetable) {
+                app.getSchedule( timetable.key, timetable.label);
+            });
+        } else {
+            app.defaultTimetables();
+        }
+    }).catch(function (err) {
+        console.log(err);
+        app.defaultTimetables();
+    });
+
 })();
