@@ -119,54 +119,59 @@
      *
      ****************************************************************************/
 
+    function getStationsFromCache(key) {
+        if (!('caches' in window)) {
+            return null;
+        }
+        var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
+        return caches.match(url)
+            .then((response) => {
+                if (response) {
+                    return response.json();
+                }
+                return null;
+            })
+            .catch((err) => {
+                console.error('Error getting data from cache', err);
+                return null;
+            });
+    }
+
+    function getStationsFromNetwork(key) {
+        var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
+        return fetch(url, { method: 'GET' })
+            .then((response) => {
+                return response.json();
+            })
+            .catch(() => {
+                return null;
+            });
+    }
+
 
     app.getSchedule = function (key, label) {
-        var url = 'https://api-ratp.pierre-grimaud.fr/v3/schedules/' + key;
-
-        if ('caches' in window) {
-            /*
-             * Se toma de la cache los mas recientes datos del metro, mientras se realiza la consulta por los mas actuales.
-             */
-            caches.match(url).then(function(response) {
-                if (response) {
-                    response.json().then(function updateFromCache(json) {
-                        var result = {};
-                        result.schedules= json.result.schedules;
-                        result.key = key;
-                        result.label = label;
-                        result.created = json._metadata.date;
-                        app.updateTimetableCard(result);
-                    });
-                }
-            });
-        }
-        
-        var request = new XMLHttpRequest();
-        request.onreadystatechange = function () {
-            if (request.readyState === XMLHttpRequest.DONE) {
-                if (request.status === 200) {
-
-                    if(app.isFirstResponse){
-                        window.apiResponseTime = performance.now();
-                        app.isFirstResponse = false;
-                    }
-                   
-                    
-                    var response = JSON.parse(request.response);
-                    var result = {};
-                    result.key = key;
-                    result.label = label;
-                    result.created = response._metadata.date;
-                    result.schedules = response.result.schedules;
-                    app.updateTimetableCard(result);
-                }
-            } else {
-                // Return the initial weather forecast since no data is available.
-                app.updateTimetableCard(initialStationTimetable);
-            }
-        };
-        request.open('GET', url);
-        request.send();
+        getStationsFromNetwork(key).then((responseJson) => {
+            var result = {};
+            result.key = key;
+            result.label = label;
+            result.created = responseJson._metadata.date;
+            result.schedules = responseJson.result.schedules;
+            app.updateTimetableCard(result);
+            console.log("internet:", result.key, "schedules:",JSON.stringify(result.schedules));
+        }).catch((err) => {
+            console.error('error form internet', err);
+        });
+        getStationsFromCache(key).then((responseJson) => {
+            var result = {};
+            result.key = key;
+            result.label = label;
+            result.created = responseJson._metadata.date;
+            result.schedules = responseJson.result.schedules;
+            console.log("cache:", result.key, "schedules:",JSON.stringify(result.schedules));
+            app.updateTimetableCard(result);
+        }).catch((err) => {
+            console.info('No avaible');
+        });
     };
 
     // Iterate all of the cards and attempt to get the latest timetable data

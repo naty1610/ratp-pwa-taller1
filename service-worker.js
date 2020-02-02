@@ -18,7 +18,7 @@
 'use strict';
 
 // CODELAB: Update cache names any time any of the cached files change.
-const CACHE_NAME = "static-cache-v1";
+const CACHE_NAME = "static-cache-v2";
 const DATA_CACHE_NAME = 'data-cache-v1';
 
 // CODELAB: Add list of files to cache here.
@@ -53,8 +53,7 @@ self.addEventListener("activate", evt => {
   console.log("[ServiceWorker] Activate");
   evt.waitUntil(
       caches.keys().then(keyList => {
-          return Promise.all(
-              keyList.map(key => {
+          return Promise.all(keyList.map(key => {
                   if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
                       console.log("[ServiceWorker] Removing old cache", key);
                       return caches.delete(key);
