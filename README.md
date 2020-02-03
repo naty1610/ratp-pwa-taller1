@@ -37,7 +37,7 @@ Con este código importamos la librería de workbox-sw.js la cual nos permite al
 
 ## Reportes Lighthouse
 #### Reporte inicial
-![](https://github.com/naty1610/ratp-pwa-taller1/blob/master/images/reporte_1.png)
+![](https://github.com/naty1610/ratp-pwa-taller1/blob/master/images/reporte_1.jpg)
 #### Reporte final en local
 ![](https://github.com/naty1610/ratp-pwa-taller1/blob/master/images/reporte_local_pwa.jpg)
 #### Reporte Firebase
