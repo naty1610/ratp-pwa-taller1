@@ -119,6 +119,28 @@
       });
     }
   </script>
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
 
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+      https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-analytics.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyBi95s8XCsiadGx9MZ0ZiYX3Im1C9RSn9g",
+      authDomain: "taller1-daury-lecca.firebaseapp.com",
+      databaseURL: "https://taller1-daury-lecca.firebaseio.com",
+      projectId: "taller1-daury-lecca",
+      storageBucket: "taller1-daury-lecca.appspot.com",
+      messagingSenderId: "338062767898",
+      appId: "1:338062767898:web:9d5921732f1f9c82addea3",
+      measurementId: "G-HZBEEGVXFZ"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </body>
 </html>
