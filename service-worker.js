@@ -17,7 +17,32 @@
  */
 'use strict';
 
-// CODELAB: Update cache names any time any of the cached files change.
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js');
+
+workbox.setConfig({ debug: true });
+
+workbox.core.setCacheNameDetails({
+    prefix: 'ratp-pwa',
+    suffix: 'v1',
+    precache: 'precache-cache',
+    runtime: 'runtime-cache',
+});
+
+workbox.routing.registerRoute(
+    new RegExp('/.*'),
+    new workbox.strategies.StaleWhileRevalidate({
+        cacheName: 'ratp-pwa-cache',
+    })
+);
+
+workbox.routing.registerRoute(
+    new RegExp('^https:\/\/api-ratp\.pierre-grimaud\.fr\/v3\/'),
+    new workbox.strategies.StaleWhileRevalidate({
+        cacheName: 'ratp-pwa-data-cache',
+    })
+);
+
+/* // CODELAB: Update cache names any time any of the cached files change.
 const CACHE_NAME = "static-cache-v2";
 const DATA_CACHE_NAME = 'data-cache-v1';
 
@@ -96,5 +121,6 @@ self.addEventListener('fetch', (evt) => {
       })
   );
 
-});
+}); */
+
 
