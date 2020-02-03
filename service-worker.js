@@ -26,12 +26,13 @@ const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/styles/inline.css',
-  '/images/icons/icon-128x128.png',
-  '/images/icons/icon-64x64.png',
-  '/images/icons/icon-256x256.png',
-  '/images/icons/icon-512x512.png',
+  '/images/icons/metro-128x128.png',
+  '/images/icons/metro-64x64.png',
+  '/images/icons/metro-256x256.png',
+  '/images/icons/metro-512x512.png',
   '/images/ic_add_white_24px.svg',
   '/images/ic_refresh_white_24px.svg',
+  '/images/ic_install.svg',
   '/scripts/app.js'
 
 ];
